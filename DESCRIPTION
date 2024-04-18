@@ -1,0 +1,20 @@
+Package: tmbExtract
+Title: Extract TMB parameters
+Version: 0.1.0
+Authors@R: 
+    person("Jemay", "Salomon", , "jemay.salomon@inrae.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-4454-7916"))
+Description: Extract TMB parameters from a list containing TMB::MakeADFun
+    and nlminb objects.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    TMB
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

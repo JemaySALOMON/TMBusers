@@ -1,0 +1,11 @@
+citHeader("To cite 'tmbExtract' in publications, use:")
+
+citEntry(entry = "Misc",
+  title        = "TmbExtract: Extract TMB parameters",
+  author       = personList(as.person("Jemay Salomon")), # only the maintainer here
+  url          = "",
+
+  textVersion  =
+  paste("Salomon, J. (2024). Extract TMB parameters.",
+        "URL ")
+)
