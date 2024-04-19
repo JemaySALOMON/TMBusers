@@ -1,4 +1,7 @@
-      
+
+
+      #' @title ExtractRandTmb
+      #'
       #' @description
       #'  Function to extracts random coefficients from a list containing TMB::MakeADFun and nlminb bObjects.
       #'
@@ -10,32 +13,33 @@
       #' @author Jemay Salomon
       ## @examples
       #'@export
-      ExtractRandTmb <- function(tmbObj, 
-                                 params = NULL, 
+      ExtractRandTmb <- function(tmbObj,
+                                 params = NULL,
                                  reNames=NULL) {
-        
+
         requireNamespace(package="TMB")
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
-        
-        
+
+
         if (is.null(params)) {
           randEffs <- summary(sdreporttmbObj, select = "random")[, "Estimate"]
         } else {
           if (!is.character(params)) stop("The 'random' argument must be a character vector.")
-          
-          
+
+
           randEffs <- lapply(params, function(rand) {
             idx <- which(rownames(summary(sdreporttmbObj, select = "random")) == rand)
             if (length(idx) == 0) stop(paste("Random effect '", rand, "' not found in summary."))
             summary(sdreporttmbObj, select = "random")[idx, "Estimate"] })
           names(randEffs) <- params
         }
-        
-        
+
+
         return(randEffs)
       }
-      
-      
+
+      #' @title ExtractParamsTmb
+      #'
       #'@description
       #' Function to extracts specified parameters from a list containing TMB::MakeADFun and nlminb Objects.
       #'
@@ -46,15 +50,15 @@
       #' @author Jemay Salomon
       ## @examples
       #'@export
-      ExtractParamsTmb <- function(tmbObj, 
-                                   params = NULL, 
+      ExtractParamsTmb <- function(tmbObj,
+                                   params = NULL,
                                    reNames = NULL) {
-        
+
         if (!is.list(tmbObj)) {
           stop("out must be a list")
         }
-        
-        
+
+
         if(is.null(params)){
           parameters <- tmbObj$fit$par
         } else {
@@ -63,21 +67,24 @@
               stop(paste(param, " not found in out$fit$par"))}
             idx <- grepl(paste0("^", param, "$"), names(tmbObj$fit$par))
             return(tmbObj$fit$par[idx])})
-          
-          
+
+
           parameters <- (unlist(tmbParams))
-          
-          
+
+
           if (!is.null(reNames)) {
             stopifnot(length(reNames)==length(parameters))
             names(parameters) <- reNames
           }
         }
-        
-        
+
+
         return(parameters)
       }
-      
+
+
+      #' @title ExtractVarTmb
+      #'
       #'@description
       #' Function to extract  variances parameters from a list containing TMB::MakeADFun and nlminb Objects
       #'
@@ -89,24 +96,25 @@
       ## @examples
       #'
       #'@export
-      ExtractVarTmb <- function(tmbObj, 
-                                params, 
+      ExtractVarTmb <- function(tmbObj,
+                                params,
                                 reNames = NULL) {
-        
-        
+
+
         if(is.null(params)){
           stop("Params must be specified")}
         idx <- ExtractParamsTmb(tmbObj,params, reNames)
-        
-        
+
+
         var <- exp((idx))^2
-        
-        
+
+
         return(var)
       }
-      
-      
-      
+
+
+      #' @title  ExtractCorTmb
+      #'
       #'@description
       #' Function to extract  correlation parameters from a list containing TMB::MakeADFun and nlminb Objects
       #'
@@ -118,21 +126,21 @@
       ## @examples
       #'
       #'@export
-      ExtractCorTmb <- function(tmbObj, 
-                                params = NULL, 
+      ExtractCorTmb <- function(tmbObj,
+                                params = NULL,
                                 reNames = NULL) {
-        
+
         #range check
         if (!is.list(tmbObj)) {
           stop("out must be a list")
         }
-        
+
         #Get report object from report(f)
         objReport = tmbObj$f$report()
-        
+
         #set the output list
         out <- list()
-        
+
         #set conditions parameters
         if(is.null(params)){
           Names <- list()
@@ -140,22 +148,24 @@
             Names[[param]] <- names(objReport)[[param]]
             out[[param]] <- objReport[[param]][2]
             names(out) <- Names}
-          
+
         } else {
           for(param in params) {
             if (is.null(objReport[[param]])) stop(paste(param, "not found in obj$f$report()"))
             out[[param]] <- objReport[[param]][2]}
-          
-          
+
+
           if (!is.null(reNames)) {
             stopifnot(length(reNames) == length(out))
             names(out) <- reNames
           }
         }
-        
+
         return(unlist(out))
       }
-      
+
+      #' @title tmbExtract
+      #'
       #'@description
       #' Macro function to extract TMB parameters of specified types.
       #'
@@ -167,16 +177,16 @@
       #' @author Jemay Salomon
       ## @examples
       #' @export
-      tmbExtract <- function(tmbObj, 
-                             params = NULL, 
-                             reNames = NULL, 
+      tmbExtract <- function(tmbObj,
+                             params = NULL,
+                             reNames = NULL,
                              paramsType){
-        
+
         #set arguments parameters
         argsTmb <- list(tmbObj = tmbObj,
                         params = params,
                         reNames = reNames)
-        
+
         #set conditions
         if (paramsType == "paramsTmb") {
           out <- do.call(ExtractParamsTmb, argsTmb)
@@ -189,8 +199,8 @@
         } else {
           stop("Invalid paramsType")
         }
-        
+
         #return
         return(out)
-        
+
       }
