@@ -1,5 +1,4 @@
 
-
       #' @title ExtractRandTmb
       #'
       #' @description
@@ -37,7 +36,9 @@
 
         return(randEffs)
       }
-
+      
+      
+      
       #' @title ExtractParamsTmb
       #'
       #'@description
@@ -81,8 +82,9 @@
 
         return(parameters)
       }
-
-
+      
+      
+      
       #' @title ExtractVarTmb
       #'
       #'@description
@@ -111,8 +113,9 @@
 
         return(var)
       }
-
-
+      
+      
+      
       #' @title  ExtractCorTmb
       #'
       #'@description
@@ -163,7 +166,9 @@
 
         return(unlist(out))
       }
-
+      
+      
+      
       #' @title tmbExtract
       #'
       #'@description
