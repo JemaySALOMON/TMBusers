@@ -1,5 +1,11 @@
       
-      #' Function to extracts random coefficients from a list containing TMB::MakeADFun and nlminb tmbObjects.
+      #--------------------------------------------------------------------
+      # Detailed Purpose:
+      #    The main purpose of this Rscript is to house the necessary
+      #   functions to work with tmb ouput.
+      #--------------------------------------------------------------------
+
+      #' Function to extracts random coefficients from a list containing TMB::MakeADFun and nlminb bObjects.
       #'
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb objects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
@@ -34,7 +40,7 @@
       }
       
       
-      #' Function to extracts specified parameters from a list containing TMB::MakeADFun and nlminb tmbObjects.
+      #' Function to extracts specified parameters from a list containing TMB::MakeADFun and nlminb Objects.
       #'
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
@@ -76,7 +82,7 @@
       }
       
       
-      #' Function to extract  variances parameters from a list containing TMB::MakeADFun and nlminb tmbObjects
+      #' Function to extract  variances parameters from a list containing TMB::MakeADFun and nlminb Objects
       #'
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
@@ -105,7 +111,7 @@
       
       
       
-      #' Function to extract  correlation parameters from a list containing TMB::MakeADFun and nlminb tmbObjects
+      #' Function to extract  correlation parameters from a list containing TMB::MakeADFun and nlminb Objects
       #'
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
