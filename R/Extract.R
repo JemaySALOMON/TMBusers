@@ -1,6 +1,4 @@
       
-  
-
       #' @description
       #'  Function to extracts random coefficients from a list containing TMB::MakeADFun and nlminb bObjects.
       #'
