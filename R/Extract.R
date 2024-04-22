@@ -181,7 +181,6 @@
       ## @examples
       #'
       #'@export
-      
       ExtractStdTmb <- function(tmbObj, 
                                 params = NULL, 
                                 reNames = NULL){
