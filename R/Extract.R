@@ -34,7 +34,7 @@
         }
 
 
-        return(randEffs)
+        return(unlist(andEffs))
       }
       
       
