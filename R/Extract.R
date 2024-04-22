@@ -34,7 +34,7 @@
         }
 
 
-        return(unlist(andEffs))
+        return(unlist(randEffs))
       }
       
       
@@ -165,6 +165,27 @@
         }
 
         return(unlist(out))
+      }
+      
+      
+      #' @title  ExtractStdTmb
+      #'
+      #'@description
+      #' Function to extract  standard error parameters from a list containing TMB::MakeADFun and nlminb Objects
+      #'
+      #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
+      #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
+      #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
+      #' @return A matrix of chosen parameters with their standard error
+      #' @author Jemay Salomon
+      ## @examples
+      #'
+      #'@export
+      
+      ExtractStdTmb <- function(tmbObj, 
+                                params = NULL, 
+                                reNames = NULL){
+        
       }
       
       
