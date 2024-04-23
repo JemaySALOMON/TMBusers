@@ -3,6 +3,7 @@
 export(ExtractCorTmb)
 export(ExtractParamsTmb)
 export(ExtractRandTmb)
+export(ExtractStdTmb)
 export(ExtractVarTmb)
 export(tmbExtract)
 importFrom(TMB,sdreport)
