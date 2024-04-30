@@ -184,7 +184,15 @@
       ExtractStdTmb <- function(tmbObj, 
                                 params = NULL, 
                                 reNames = NULL){
-        
+	#range check
+	if(!is.list(tmbObj) stop("tmbOj must be a list")
+
+        #require tmb packages and make summary
+        requireNamespace(package="TMB")                                              
+        sdreporttmbObj <- TMB::sdreport(tmbObj$f)
+
+         
+
       }
       
       
