@@ -185,7 +185,7 @@
                                 params = NULL, 
                                 reNames = NULL){
 	#range check
-	if(!is.list(tmbObj) stop("tmbOj must be a list")
+	if(!is.list(tmbObj)) stop("tmbOj must be a list")
 
         #require tmb packages and make summary
         requireNamespace(package="TMB")                                              
