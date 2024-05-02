@@ -19,7 +19,6 @@
         requireNamespace(package="TMB")
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
 
-
         if (is.null(params)) {
           randEffs <- summary(sdreporttmbObj, select = "random")[, "Estimate"]
         } else {
@@ -133,6 +132,9 @@
                                 params = NULL,
                                 reNames = NULL) {
 
+        #load dllID
+        dyn.load(TMB::dynlib(tmbObj$dllID))
+        
         #range check
         if (!is.list(tmbObj)) {
           stop("out must be a list")
@@ -185,7 +187,7 @@
                                 params = NULL, 
                                 reNames = NULL){
 	#range check
-	if(!is.list(tmbObj)) stop("tmbOj must be a list")
+	if(!is.list(tmbObj))o stop("tmbOj must be a list")
 
         #require tmb packages and make summary
         requireNamespace(package="TMB")                                              
