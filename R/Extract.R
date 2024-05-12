@@ -214,9 +214,10 @@
       ## @examples
       #'
       #'@export
-      ExtractStdTmb <- function(tmbObj, path = NULL,
+      ExtractStdTmb <- function(tmbObj,
                                 params = NULL, 
-                                reNames = NULL){
+                                reNames = NULL
+                                path = NULL){
         
         if (!is.null(path)) {
           dll <- file.path(path, tmbObj$dllID)
