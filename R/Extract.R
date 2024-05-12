@@ -14,8 +14,20 @@
       #'@export
       ExtractRandTmb <- function(tmbObj,
                                  params = NULL,
-                                 reNames=NULL) {
-
+                                 reNames = NULL,
+                                 path = NULL) {
+  
+        
+        if (!is.null(path)) {
+          dll <- file.path(path, tmbObj$dllID)
+        } else {
+          dll <- tmbObj$dllID
+        }
+        
+        # Load the DLL using dyn.load
+        dyn.load(TMB::dynlib(dll))
+        
+      
         requireNamespace(package="TMB")
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
 
@@ -52,7 +64,19 @@
       #'@export
       ExtractParamsTmb <- function(tmbObj,
                                    params = NULL,
-                                   reNames = NULL) {
+                                   reNames = NULL,
+                                   path = NULL) {
+        
+        
+        if (!is.null(path)) {
+          dll <- file.path(path, tmbObj$dllID)
+        } else {
+          dll <- tmbObj$dllID
+        }
+        
+        # Load the DLL using dyn.load
+        dyn.load(TMB::dynlib(dll))
+        
 
         if (!is.list(tmbObj)) {
           stop("out must be a list")
@@ -99,8 +123,20 @@
       #'@export
       ExtractVarTmb <- function(tmbObj,
                                 params,
-                                reNames = NULL) {
-
+                                reNames = NULL,
+                                path = NULL) {
+        
+        
+        if (!is.null(path)) {
+          dll <- file.path(path, tmbObj$dllID)
+        } else {
+          dll <- tmbObj$dllID
+        }
+        
+        # Load the DLL using dyn.load
+        dyn.load(TMB::dynlib(dll))
+        }
+        
 
         if(is.null(params)){
           stop("Params must be specified")}
@@ -130,7 +166,17 @@
       #'@export
       ExtractCorTmb <- function(tmbObj,
                                 params = NULL,
-                                reNames = NULL) {
+                                reNames = NULL,
+                                path = NULL) {
+        
+        if (!is.null(path)) {
+          dll <- file.path(path, tmbObj$dllID)
+        } else {
+          dll <- tmbObj$dllID
+        }
+        
+        # Load the DLL using dyn.load
+        dyn.load(TMB::dynlib(dll))
 
         #load dllID
         dyn.load(TMB::dynlib(tmbObj$dllID))
@@ -183,18 +229,46 @@
       ## @examples
       #'
       #'@export
-      ExtractStdTmb <- function(tmbObj, 
+      ExtractStdTmb <- function(tmbObj, path = NULL,
                                 params = NULL, 
                                 reNames = NULL){
-	#range check
-	if(!is.list(tmbObj))o stop("tmbOj must be a list")
-
+        
+        if (!is.null(path)) {
+          dll <- file.path(path, tmbObj$dllID)
+        } else {
+          dll <- tmbObj$dllID
+        }
+        
+        # Load the DLL using dyn.load
+        dyn.load(TMB::dynlib(dll))
+        
+        
+        #range check
+        if(!is.list(tmbObj)) stop("tmbOj must be a list")
+        
         #require tmb packages and make summary
         requireNamespace(package="TMB")                                              
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
-
-         
-
+        
+        if (is.null(params)) {
+          stdEffs <- summary(sdreporttmbObj)[, "Std. Error"]
+        } else {
+          if (!is.character(params)) stop("The 'params' argument must be a character vector.")
+          
+          tmp <- lapply(params, function(std) {
+            idx <- which(rownames(summary(sdreporttmbObj)) == std)
+            if (length(idx) == 0) stop(paste("std effect '", std, "' not found in summary."))
+            summary(sdreporttmbObj)[idx, "Std. Error"] })
+        }
+        
+        out <- unlist(tmp)
+        
+        if(!is.null(reNames)){
+          stopifnot(length(out)==length(reNames))
+          names(out) <- reNames
+        }
+        
+        return(cbind("Std. Error" = out))
       }
       
       
@@ -215,12 +289,14 @@
       tmbExtract <- function(tmbObj,
                              params = NULL,
                              reNames = NULL,
+                             path = NULL
                              paramsType){
 
         #set arguments parameters
         argsTmb <- list(tmbObj = tmbObj,
                         params = params,
-                        reNames = reNames)
+                        reNames = reNames,
+                        path = path)
 
         #set conditions
         if (paramsType == "paramsTmb") {
@@ -231,6 +307,8 @@
           out <- do.call(ExtractVarTmb, argsTmb)
         } else if (paramsType == "correlation") {
           out <- do.call(ExtractCorTmb, argsTmb)
+        } else if (paramsType == "std. error") {
+          out <- do.call(ExtractStdTmb, argsTmb)
         } else {
           stop("Invalid paramsType")
         }
