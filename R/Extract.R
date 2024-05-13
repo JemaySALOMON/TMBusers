@@ -7,8 +7,8 @@
       #'
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb objects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
-      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
+      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @return A vector of chosen parameters.
       #' @author Jemay Salomon
       ## @examples
