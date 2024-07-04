@@ -1,0 +1,34 @@
+---
+title: "Introduction to tmbExtract"
+author: "Jemay Salomon"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+lang: "fr"
+output:
+  html_document:
+    toc: true
+    toc_depth: 5
+    toc_float: true
+    number_sections: TRUE
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: TRUE
+colorlinks: true
+urlcolor: blue
+abstract: "This document aims at introducing the package tmbExtract and show to extract parameters from TMB output."
+vignette: >
+  %\VignetteIndexEntry{Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tmbExtract)
+```

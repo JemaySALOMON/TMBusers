@@ -4,7 +4,7 @@
 \alias{ExtractStdTmb}
 \title{ExtractStdTmb}
 \usage{
-ExtractStdTmb(tmbObj, params = NULL, reNames = NULL)
+ExtractStdTmb(tmbObj, params = NULL, reNames = NULL, path = NULL)
 }
 \arguments{
 \item{tmbObj}{A list that contains the TMB::MakeADFun and nlminb tmbObjects.}
@@ -12,6 +12,8 @@ ExtractStdTmb(tmbObj, params = NULL, reNames = NULL)
 \item{params}{Parameter names to extract. If NULL, all parameters will be extracted.}
 
 \item{reNames}{A vector of names to rename parameters. If NULL, the original TMB names will be retained.}
+
+\item{path}{The path trough your dllID-object location. If it is in the current working directory, set it to NULL}
 }
 \value{
 A matrix of chosen parameters with their standard error

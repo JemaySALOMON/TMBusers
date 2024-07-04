@@ -4,7 +4,7 @@
 \alias{ExtractRandTmb}
 \title{ExtractRandTmb}
 \usage{
-ExtractRandTmb(tmbObj, params = NULL, reNames = NULL)
+ExtractRandTmb(tmbObj, params = NULL, reNames = NULL, path = NULL)
 }
 \arguments{
 \item{tmbObj}{A list that contains the TMB::MakeADFun and nlminb objects.}
@@ -12,6 +12,8 @@ ExtractRandTmb(tmbObj, params = NULL, reNames = NULL)
 \item{params}{Parameter names to extract. If NULL, all parameters will be extracted.}
 
 \item{reNames}{A vector of names to rename parameters. If NULL, the original TMB names will be retained.}
+
+\item{path}{The path trough your dllID-object location. If it is in the current working directory, set it to NULL}
 }
 \value{
 A vector of chosen parameters.

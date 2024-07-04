@@ -8,7 +8,7 @@
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb objects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
-      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
+      #' @param path The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @return A vector of chosen parameters.
       #' @author Jemay Salomon
       ## @examples
@@ -55,7 +55,7 @@
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
-      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
+      #' @param path The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @return A vector of chosen parameters.
       #' @author Jemay Salomon
       ## @examples
@@ -108,7 +108,7 @@
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
-      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
+      #' @param path The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @return A vector of chosen parameters.
       #' @author Jemay Salomon
       ## @examples
@@ -127,17 +127,15 @@
         
         # Load the DLL using dyn.load
         dyn.load(TMB::dynlib(dll))
+        
+        if(is.null(params)){
+          stop("Params must be specified")}
+        idx <- ExtractParamsTmb(tmbObj,params, reNames)
+        
+        var <- exp((idx))^2
+        
+        return(var)
       }
-      
-      if(is.null(params)){
-        stop("Params must be specified")}
-      idx <- ExtractParamsTmb(tmbObj,params, reNames)
-      
-      var <- exp((idx))^2
-      
-      return(var)
-      }
-      
       
       
       #' @title  ExtractCorTmb
@@ -148,7 +146,7 @@
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
-      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
+      #' @param path The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @return A vector of chosen parameters.
       #' @author Jemay Salomon
       ## @examples
@@ -213,7 +211,7 @@
       #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
-      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
+      #' @param path The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @return A matrix of chosen parameters with their standard error
       #' @author Jemay Salomon
       ## @examples
@@ -221,7 +219,7 @@
       #'@export
       ExtractStdTmb <- function(tmbObj,
                                 params = NULL, 
-                                reNames = NULL
+                                reNames = NULL,
                                 path = NULL){
         
         if (!is.null(path)) {
@@ -271,7 +269,7 @@
       #' @param tmbObj A list containing TMB::MakeADFun and nlminb tmbObjects.
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
-      #' @param path  The path trough your dllID-object location. If it is in the current working directory, set it to NULL
+      #' @param path The path trough your dllID-object location. If it is in the current working directory, set it to NULL
       #' @param paramsType Specifies the type of TMB parameters to extract (e.g., "paramsTmb", "random", "variance", "correlation").
       #' @return A vector of selected parameters.
       #' @author Jemay Salomon
@@ -279,7 +277,7 @@
       tmbExtract <- function(tmbObj,
                              params = NULL,
                              reNames = NULL,
-                             path = NULL
+                             path = NULL,
                              paramsType){
         
         #set arguments parameters
