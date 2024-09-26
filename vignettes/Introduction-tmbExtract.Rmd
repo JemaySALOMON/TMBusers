@@ -22,13 +22,58 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+
+<div align="justify">
+
+```{r setup, include=FALSE}
+suppressPackageStartupMessages(library(knitr))
+opts_chunk$set(echo=TRUE, warning=TRUE, message=TRUE, cache=FALSE,
+               fig.align="center")
+opts_knit$set(progress=TRUE, verbose=TRUE)
 ```
 
-```{r setup}
-library(tmbExtract)
+
+# Preamble
+
+Paths:
+
+Dependencies:
+```{r}
+suppressPackageStartupMessages(library(TMB))
+suppressPackageStartupMessages(library(tmbExtract))
 ```
+
+Execution time (see the appendix):
+```{r time_0}
+t0 <- proc.time()
+```
+
+
+# Data
+```{r}
+
+```
+
+# TMB model
+```{r}
+
+```
+
+# Construct MakeADFun object and fit model
+```{r}
+
+```
+
+# Extract parameters and compare with simulated data 
+```{r}
+
+```
+
+
+# Appendix
+
+```{r info}
+t1 <- proc.time(); t1 - t0
+print(sessionInfo(), locale=FALSE)
+```
+
