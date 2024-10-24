@@ -18,6 +18,9 @@
                                  reNames = NULL,
                                  path = NULL) {
         
+        #require tmb packages and make summary
+        requireNamespace(package="TMB")
+        
         if (!is.null(path)) {
           dll <- file.path(path, tmbObj$dllID)
         } else {
@@ -27,7 +30,6 @@
         # Load the DLL using dyn.load
         dyn.load(TMB::dynlib(dll))
         
-        requireNamespace(package="TMB")
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
         
         if (is.null(params)) {
@@ -64,6 +66,8 @@
                                    params = NULL,
                                    reNames = NULL,
                                    path = NULL) {
+        #require tmb packages and make summary
+        requireNamespace(package="TMB")
         
         if (!is.null(path)) {
           dll <- file.path(path, tmbObj$dllID)
@@ -119,6 +123,9 @@
                                 reNames = NULL,
                                 path = NULL) {
         
+        #require tmb packages and make summary
+        requireNamespace(package="TMB")
+        
         if (!is.null(path)) {
           dll <- file.path(path, tmbObj$dllID)
         } else {
@@ -156,6 +163,9 @@
                                 params = NULL,
                                 reNames = NULL,
                                 path = NULL) {
+        
+        #require tmb packages and make summary
+        requireNamespace(package="TMB")
         
         if (!is.null(path)) {
           dll <- file.path(path, tmbObj$dllID)
@@ -222,6 +232,9 @@
                                 reNames = NULL,
                                 path = NULL){
         
+        #require tmb packages and make summary
+        requireNamespace(package="TMB")  
+        
         if (!is.null(path)) {
           dll <- file.path(path, tmbObj$dllID)
         } else {
@@ -234,8 +247,7 @@
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
         
-        #require tmb packages and make summary
-        requireNamespace(package="TMB")                                              
+        
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
         
         if (is.null(params)) {
