@@ -21,14 +21,11 @@
         #require tmb packages and make summary
         requireNamespace(package="TMB")
         
-        if (!is.null(path)) {
-          dll <- file.path(path, tmbObj$dllID)
-        } else {
-          dll <- tmbObj$dllID
-        }
-        
         # Load the DLL using dyn.load
-        dyn.load(TMB::dynlib(dll))
+        if(!is.null(path))
+          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+        else
+          dyn.load(TMB::dynlib(tmbObj$dllID))
         
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
         
@@ -69,15 +66,13 @@
         #require tmb packages and make summary
         requireNamespace(package="TMB")
         
-        if (!is.null(path)) {
-          dll <- file.path(path, tmbObj$dllID)
-        } else {
-          dll <- tmbObj$dllID
-        }
-        
         # Load the DLL using dyn.load
-        dyn.load(TMB::dynlib(dll))
+        if(!is.null(path))
+          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+        else
+          dyn.load(TMB::dynlib(tmbObj$dllID))
         
+        #check
         if (!is.list(tmbObj)) {
           stop("out must be a list")
         }
@@ -126,15 +121,13 @@
         #require tmb packages and make summary
         requireNamespace(package="TMB")
         
-        if (!is.null(path)) {
-          dll <- file.path(path, tmbObj$dllID)
-        } else {
-          dll <- tmbObj$dllID
-        }
-        
         # Load the DLL using dyn.load
-        dyn.load(TMB::dynlib(dll))
+        if(!is.null(path))
+          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+        else
+          dyn.load(TMB::dynlib(tmbObj$dllID))
         
+        # check
         if(is.null(params)){
           stop("Params must be specified")}
         idx <- ExtractParamsTmb(tmbObj,params, reNames)
@@ -167,17 +160,11 @@
         #require tmb packages and make summary
         requireNamespace(package="TMB")
         
-        if (!is.null(path)) {
-          dll <- file.path(path, tmbObj$dllID)
-        } else {
-          dll <- tmbObj$dllID
-        }
-        
         # Load the DLL using dyn.load
-        dyn.load(TMB::dynlib(dll))
-        
-        #load dllID
-        dyn.load(TMB::dynlib(tmbObj$dllID))
+        if(!is.null(path))
+          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+        else
+          dyn.load(TMB::dynlib(tmbObj$dllID))
         
         #range check
         if (!is.list(tmbObj)) {
@@ -235,18 +222,14 @@
         #require tmb packages and make summary
         requireNamespace(package="TMB")  
         
-        if (!is.null(path)) {
-          dll <- file.path(path, tmbObj$dllID)
-        } else {
-          dll <- tmbObj$dllID
-        }
-        
         # Load the DLL using dyn.load
-        dyn.load(TMB::dynlib(dll))
+        if(!is.null(path))
+          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+        else
+          dyn.load(TMB::dynlib(tmbObj$dllID))
       
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
-        
         
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
         

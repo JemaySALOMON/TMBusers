@@ -22,25 +22,24 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+This document will also require external packages to be available, for instance:
 
-<div align="justify">
-
-```{r setup, include=FALSE}
-suppressPackageStartupMessages(library(knitr))
-opts_chunk$set(echo=TRUE, warning=TRUE, message=TRUE, cache=FALSE,
-               fig.align="center")
-opts_knit$set(progress=TRUE, verbose=TRUE)
-```
-
-
-# Preamble
-
-Paths:
-
-Dependencies:
-```{r}
+```{r load_pkg}
+suppressPackageStartupMessages(library(MASS))
+suppressPackageStartupMessages(library(rutilstimflutre))
 suppressPackageStartupMessages(library(TMB))
-suppressPackageStartupMessages(library(tmbExtract))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(gtools))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(mvtnorm))
+suppressPackageStartupMessages(library(MixMatrix))
+suppressPackageStartupMessages(library(Matrix))
+suppressPackageStartupMessages(library(lme4))
+suppressPackageStartupMessages(library(Rcpp))
+#devtools::install_github("kaskr/TMB_contrib_R/TMBhelper")
+suppressPackageStartupMessages(library(TMBhelper))
+
+
 ```
 
 Execution time (see the appendix):
@@ -49,31 +48,635 @@ t0 <- proc.time()
 ```
 
 
-# Data
+# Overview
+This script aims to simulate three (3) breeding strategy scenarios for interspecific mixed crops using wheat and pea as species models, considering a range of parameters. The simulation involves 150 wheat plants (focal) and 1 tester pea and three (3) experimental designs
+
+* Description
+
+200 wheats in pure  
+2 tester pea in pure stand  
+400 mixed stands (200-wheats x 2-peas)   
+X 2 blocs = 1204 microplots
+
+
+# Simulation : general data structure
+
+## Loading functions and set contrast for inferences
 ```{r}
+srcDir <- file.path(projectDir, "src/")
+source(paste0(srcDir, "phdmobidiv_utils.R")) # loading functions
+```
+
+```{r}
+options(contrasts=c("contr.sum", "contr.poly"))
+getOption("contrasts")
+```
+
+
+## Dimensions of the simulation
+```{r}
+# Plant materials
+W = 200 #number of wheat genotypes
+P = 2 # Number of pea genotypes
+wheats <- sprintf("wheat%02d", 1:W) # creates names for W wheat genotypes 
+peas <- sprintf("pea%02d", 1:P) # creates names for P pea genotypes 
+
+# levels
+levSpecies <- c("wheat", "pea")
+levStand <- c("pure", "mixed")
+levContrast <- c("mu","block1")
+levelsPea <- peas
+```
+
+
+## Set-up the initial data frame
+```{r}
+## blocks
+B <- 2 #number of blocks
+blocks <- LETTERS[1:B] # creates names for B
+levblocks <- blocks
+
+## creates the data structure
+dat.block1 <- data.frame(stand=c(rep("pure",W),
+                                 rep("pure",P),
+                                 rep("mixed",W*P)),
+                         wheat=c(wheats, rep(NA, P), rep(wheats, each=P)),
+                         pea=c(rep(NA, W),peas, rep(peas, W)),
+                         block=NA)
+dat <- dat.block1
+
+## format
+for(k in 2:B){ # attaches the the same data.frame underneath k-times
+  dat <- rbind(dat, dat.block1)
+}
+dat$block <- as.factor(rep(blocks, each=nrow(dat.block1)))
+dat$name <- paste0(dat$wheat, "_", dat$pea)
+dat$name <- gsub("NA_|_NA", "", dat$name)
+dat$name <- factor(dat$name)
+dat$stand=as.factor(dat$stand)
+str(dat)
+n.bl=length(unique(dat$name))
+nb=length(unique(dat$block))
+dat$x=c(rep(1, n.bl), rep(2,n.bl))
+dat$y=c(replicate(nb, sample(1:n.bl)))
+```
+
+```{r}
+dat_m <- dat #to use later in section mix only
+```
+
+
+## Reformatting
+
+```{r}
+## splitDat
+datTest=SplitDAT(df=dat, name="name", stand="stand", block="block", list.pea=peas,
+                 sep="_")
+datTest$focal <- factor(datTest$focal)
+datTest$neighbors <- factor(datTest$neighbors)
+datTest$species <- factor(datTest$species, levels=c("wheat","pea"))
+datTest$block<- factor(datTest$block, levblocks)
+str(datTest)
+head(datTest)
+tail(datTest)
+```
+
+
+## Params for fixed effects
+
+In this section we set up the parameters for simulations
+
+Here the mean of yield for wheat and pea in pure and mixed stand
+```{r}
+mu_w_pur=65
+mu_w_mix = 65*0.75
+mu_p_pur =30
+mu_p_mix = 30*1.0
 
 ```
 
-# TMB model
+
+Block effects v1: `~ 0 + species + species:block`
+Seeting up the fixed parameters for block effects using  `contr.sum`
+
 ```{r}
+## contrast block1-Species array
+block1SpeciesEffs <- array(0,
+                           dim = c(length(levSpecies), 
+                                   length(levStand), 
+                                   length(levContrast)),
+                           dimnames = list(levContrast, 
+                                           levStand,levSpecies ))
+block1SpeciesEffs["mu",,"wheat"] <- c(mu_w_pur, mu_w_mix)
+block1SpeciesEffs["mu",,"pea"] <- c(mu_p_pur, mu_p_mix)
+block1SpeciesEffs["block1",,"wheat"] <- c(1.3, -0.5)
+block1SpeciesEffs["block1",,"pea"] <- c(-0.7, 0.4)
+block1SpeciesEffs
+
+
+B_mix <- block1SpeciesEffs[,"mixed",]
+
+
+#matrix of DGE and IGE pea01
+focal1 <- 7  # DGE.pea01
+neighbors1  <- -2 # IGE.pea01
+U_p <- matrix(c(
+  neighbors1, 0,
+  0, focal1
+), ncol = 2)
+colnames(U_p) <- c("neighbors1", "focal1")
+
+#check
+true_beta = c(c(block1SpeciesEffs["mu","pure","wheat"],
+             block1SpeciesEffs["block1","pure","wheat"]), 
+             c(block1SpeciesEffs["mu","pure","pea"],
+             block1SpeciesEffs["block1","pure","pea"], focal1),
+             neighbors1, c(B_mix))
+U_p
+B_mix
+true_beta
+```
+
+
+## Params for random effects :
+
+In thi section we setting up parameters for the random effects
+```{r}
+truth <- list()
+## wheat
+truth[["sigma2.DGEw"]] = 5^2 # values ---> +/-(2*5)
+truth[["h2_DGEw"]]= 0.7 # test 0.1 à 0.9
+truth[["h2_DGEp"]] = 0.75 # test 0.1 à 0.9
+truth[["sigma2.DGEp"]] = 4.5^2
+truth[["sigma2.IGEp"]] = 0.30*truth[["sigma2.DGEp"]]
+
+## error variances
+truth[["sigma2_err_w"]] <- ((1 - truth[["h2_DGEw"]] ) /truth[["h2_DGEw"]]) * truth[["sigma2.DGEw"]]
+truth[["sigma2_err_p"]] <- ((1 - truth[["h2_DGEp"]] ) /truth[["h2_DGEp"]]) * truth[["sigma2.DGEp"]]
+```
+
+
+# Simulate data
+```{r}
+listZs <- list()
+```
+
+
+##  Pure only
+
+### format dat
+```{r}
+#dat
+dat_pur <- droplevels(datTest[datTest$stand=="pure", ])
+rownames(dat_pur)<- NULL
+
+#dat_pea_pur
+dat_pea_pur<- droplevels(dat_pur[dat_pur$species=="pea", ])
+dat_pea_pur$focal <- factor(dat_pea_pur$focal, levels=levelsPea)
+dat_pea_pur$neighbors <- factor(dat_pea_pur$neighbors, levels=levelsPea)
+rownames(dat_pea_pur)<- NULL
+
+#dat_wheat_pur
+dat_wheat_pur <- droplevels(dat_pur[dat_pur$species=="wheat", ])
+rownames(dat_wheat_pur)<- NULL
+```
+
+
+```{r}
+# incidence matrix
+getOption("contrasts")
+options(contrasts=c("contr.sum", "contr.poly"))
+
+#wheat
+listZs[["X_wheat_pur"]] <- model.matrix(~1+block, data = dat_wheat_pur)
+dim(listZs[["X_wheat_pur"]])
+colnames(listZs[["X_wheat_pur"]])
+
+#pea
+listZs[["X_pea_pur"]]<- model.matrix(~1+block+focal, data = dat_pea_pur)
+dim(listZs[["X_pea_pur"]])
+colnames(listZs[["X_pea_pur"]])
 
 ```
 
-# Construct MakeADFun object and fit model
+
+
+### yield
+
+`wheat`
+
 ```{r}
+set.seed(1234)
+K = diag(W)
+
+
+## errors
+Idn_w_pur <- diag(nrow(dat_wheat_pur))
+R <- truth[["sigma2_err_w"]] *Idn_w_pur
+e <- mvrnorm(n=1, mu=rep(0,nrow(dat_wheat_pur)), Sigma=R) 
+
+## Yiel ~Fixed + DGE + e
+y_w_pur_1 <- listZs[["X_wheat_pur"]] %*% c(block1SpeciesEffs["mu","pure","wheat"],
+             block1SpeciesEffs["block1","pure","wheat"]) + e
+y_w_pur_1<- y_w_pur_1[,1]
+dat_wheat_pur$yield_1 <- y_w_pur_1
+
+
+#check
+head(dat_wheat_pur)
+```
+
+
+`pea`
+
+```{r}
+set.seed(1234)
+## errors
+Idn_p_pur <- diag(nrow(dat_pea_pur))
+R <- truth[["sigma2_err_p"]] *Idn_p_pur
+e <- mvrnorm(n=1, mu=rep(0,nrow(dat_pea_pur)), Sigma=R) 
+
+## Yiel ~Fixed + e
+y_p_pur_1 <- listZs[["X_pea_pur"]] %*% c(block1SpeciesEffs["mu","pure","pea"],
+             block1SpeciesEffs["block1","pure","pea"], focal1) + e
+y_p_pur_1<- y_p_pur_1[,1]
+dat_pea_pur$yield_1 <- y_p_pur_1
+summary(lm(yield_1~1+block+focal, data = dat_pea_pur))
+sigma(lm(yield_1~1+block+focal, data = dat_pea_pur))
+```
+
+
+##  Mix only
+
+### format dat
+
+```{r}
+dat_mix <-droplevels(dat_m[dat_m$stand=="mixed",])
+dat_mix$pea <- as.factor(dat_mix$pea)
+dat_mix$wheat <- as.factor(dat_mix$wheat)
+str(dat_mix)
+rownames(dat_mix)<- NULL
+# Sort the dataframe
+dat_mix <- dat_mix %>% arrange(pea, block)
+str(dat_mix)
+```
+
+
+```{r}
+set.seed(1234)
+
+## format
+d <- length(levSpecies)
+p <- length(levblocks) ;
+m <- length(unique(dat_mix$name)); 
+species_plot<- unique(dat_mix$name) #number of mixed plots per species
+n_1 <- p * m
+n_2 <- n_1 * d
+
+stopifnot(all(dim(B_mix) == c(p, d)))
+truth[["B_mix"]] <- B_mix
+b_mix <- c(B_mix)
+
+names(b_mix) <- paste(rep(rownames(B_mix),ncol(B_mix)),
+                      rep(colnames(B_mix), each=nrow(B_mix)),
+                      sep="_")
+b_mix
+
+
+
+listZs[["Xmix"]] <- model.matrix(~ 1 + block, dat_mix, list(block="contr.sum"))
+stopifnot(all(dim(listZs[["Xmix"]]) == c(n_1, p)))
+head(listZs[["Xmix"]])
+
+
+## Errors:
+M_E <- matrix(0, n_1, d,
+              dimnames=list(NULL, levSpecies))
+Id_n1 <- diag(n_1)
+truth[["cor_E"]]<- -0.2
+Sigma_E <- matrix(c(truth[["sigma2_err_w"]], NA, NA, truth[["sigma2_err_p"]]), 2, 2)
+Sigma_E[1,2] <- Sigma_E[2,1] <- truth[["cor_E"]] * sqrt(Sigma_E[1,1] * Sigma_E[2,2])
+cov_Er <- truth[["cor_E"]] * sqrt(Sigma_E[1,1] * Sigma_E[2,2])
+dimnames(Sigma_E) <- list(levSpecies, levSpecies)
+truth[["Sigma_E"]] <- Sigma_E
+E <- rmatnorm(n=1, M_E, U=Id_n1, V=Sigma_E)
+R <- Sigma_E %x% diag(n_1)
+
+
+## matrix 2
+X_2 <- diag(d) %x% listZs[["Xmix"]]
+stopifnot(all(dim(X_2) == c(n_2, d*p)))
 
 ```
 
-# Extract parameters and compare with simulated data 
+
+### design matrix
 ```{r}
+listZs[["ZDp_mix"]] <-cbind(model.matrix(~1+pea, data=dat_mix)[, -1],model.matrix(~1+pea, data=dat_mix)[, -1])
+colnames(listZs[["ZDp_mix"]]) <- c("neigborhs1", "focal1")
+```
+
+
+### format dat_mix
+```{r}
+## concat Y_mix or use y_mix
+wheat_dat <- dat_mix
+wheat_dat$species <-"wheat"
+pea_dat <- dat_mix
+pea_dat$species <-"pea"
+dat_mix <-rbind(wheat_dat, pea_dat)
+dat_mix$species <- factor(dat_mix$species, levels=c("wheat","pea"))
+dat_mix$wheat <-as.factor(dat_mix$wheat)
+dat_mix$pea <-as.factor(dat_mix$pea)
+rownames(dat_mix)<- NULL
 
 ```
 
+
+### yield 
+
+yield (Y_mix_1)/Mod 1 : fixed effects + wheat DGE-IGE + E
+```{r}
+Y_mix_1 <- listZs[["Xmix"]] %*% B_mix + listZs[["ZDp_mix"]]%*%U_p+ E[,,1]
+colnames(Y_mix_1) <- c("yield.wheat", "yield.pea")
+y_mix_1 <- c(Y_mix_1)
+dat_mix$yield_1 <-y_mix_1
+head(Y_mix_1)
+```
+
+
+
+
+# Inferences
+
+## pure
+
+### lmer :: Model 1 (Fixed effects + DGE + e)
+
+```{r}
+mod_w_pur <- lm(yield_1~1+block, data = dat_wheat_pur)
+mod_p_pur <- lm(yield_1~1+block+focal, data = dat_pea_pur)
+
+cbind("true"=c("specieswheat_pur"=block1SpeciesEffs["mu", "pure", "wheat"], 
+               "specieswheat:block1_pur"=block1SpeciesEffs["block1", "pure", "wheat"],
+               "speciespea"=block1SpeciesEffs["mu", "pure", "pea"],
+               "speciespea:block1_pur"=block1SpeciesEffs["block1", "pure", "pea"], 
+               "speciespea:focal1_pur"=focal1, 
+               "sigma_w"=truth[["sigma2_err_w"]],
+               "sigma_p"= truth[["sigma2_err_p"]]),
+      
+      "lm"=c((summary(mod_w_pur)$coefficients)[,1],
+             (summary(mod_p_pur)$coefficients)[, 1],
+             sigma(mod_w_pur),sigma(mod_p_pur)))
+
+```
+
+
+## Mix + Pure 
+
+### lmer :: Model 1 (Fixed effects + DGE + e)
+```{r}
+mod_w_mix <- lm(yield_1~1+block+ pea, data = droplevels(dat_mix[dat_mix$species=="wheat",]))
+mod_p_mix <- lm(yield_1~1+block+ pea, data = droplevels(dat_mix[dat_mix$species=="pea",]))
+
+
+cbind("true"=c("specieswheat_mix"=block1SpeciesEffs["mu", "mixed", "wheat"], 
+               "specieswheat:block1_mix"=block1SpeciesEffs["block1", "mixed", "wheat"],
+               "speciespea:neighbors1"=neighbors1,
+               "speciespea_mix"=block1SpeciesEffs["mu", "mixed", "pea"],
+               "speciespea:block1_mix"=block1SpeciesEffs["block1", "mixed", "pea"],
+
+               "speciespea:focal1"=focal1,  
+               "sigma_w"=truth[["sigma2_err_w"]],
+               "sigma_p"=truth[["sigma2_err_w"]]),
+      
+      "lm"=c((summary(mod_w_mix)$coefficients)[,1],(summary(mod_p_mix)$coefficients)[, 1],
+            sigma(mod_w_mix)^2,
+             sigma(mod_p_mix)^2))
+```
+
+
+### TMB 
+
+#### Mod 1 
+pur : 
+$$\mathbf{y}= X\mathbf{b}+ \mathbf{\epsilon}$$
+mix : 
+$$\mathbf{Y}= XB +\in$$
+
+
+```{r}
+model <- "
+#include <TMB.hpp>
+using namespace density;
+
+template<class Type>
+Type objective_function<Type>::operator() ()
+{
+  /*-------------------------------Data--------------------------------------*/
+  // mix
+  DATA_ARRAY(Ymix);                   //Yield for cereals and legumes in MS
+  DATA_MATRIX(Xmix);                 // Design matrix for fixed effects in MS
+  DATA_MATRIX(ZDl_mix);                 // Design matrix for fixed effects in MS
+  DATA_MATRIX(Id_mix);            // Identity matrix for errors in mixed stand 
+
+  // pure
+  DATA_VECTOR(y_c);           // Yield in pure stand for cereal species
+  DATA_VECTOR(y_l);         // Yield in pure stand for legume species
+  DATA_MATRIX(X_c);       // Design matrix for fixed effects for cereal species
+  DATA_MATRIX(X_l);     // Design matrix for fixed effects for legume species
+  DATA_MATRIX(Idn_c); // Identity matrix for errors in cereal yield measurements 
+  DATA_MATRIX(Idn_l);// Identity matrix for errors in legume yield measurements 
+  
+  /*-----------------------------------Parameters-----------------------------*/
+  PARAMETER_VECTOR(beta);       // vector f=of fixed effects
+  PARAMETER(log_sd_c);          // errors in cereal yield measurements 
+  PARAMETER(log_sd_l);        // errors in legumes yield measurements 
+  PARAMETER_VECTOR(log_sd_E_mix);      // Errors parameters for cereals and legumes species
+  PARAMETER_VECTOR(unconstr_cor_E_mix); // Unconstraint correlation for errors
+  
+  
+  /*----------------------------Local variales -------------------*/
+  // size
+  int d = 2; // number of species
+  int n_1 = Ymix.rows(); // number of total mixed plots
+  int n_c = y_c.size(); //length of cereals yield vector in pure
+  int n_l = y_l.size(); // lentgh of legumes yield vector in pure
+  int f_c = X_c.cols(); //number of fixed for cereals
+  int f_l = X_l.cols(); //number of fixed effects for legumes
+  int f_m = Xmix.cols(); // number of fixed effects in mixed stand
+  int f = beta.size(); // total number of fixed effects
+  
+  
+  /*---------------- DGE & fixed effects (local parameters)-------------------*/
+  // b_c: vector of fixed effects : mu & block for cereals
+  vector<Type> b_c(f_c);
+  for (int i = 0; i < f_c; ++i) {
+    b_c[i] = beta[i];
+  }
+  
+  // b_l: vector of fixed effects : mu-block-DGE for legumes
+  vector<Type> b_l(f_l);
+  for (int i = 0; i < f_l; ++i) {
+    b_l[i] = beta[i + f_c]; // Adjust index to start from 2 for the beta vector
+  }
+  
+  
+    // Matrix of pea DGE and IGE for pea
+  matrix<Type> U_l(2, d);
+  U_l.row(0) << beta[5], 0;                   // IGE of pea in the first col
+  U_l.row(1) << 0, beta[4];                 // DGE of pea in the 2nd col
+  
+  
+  //B_mix
+  matrix<Type> B_mix(f_m, d);
+  B_mix.row(0) << beta[6], beta[8];
+  B_mix.row(1) << beta[7], beta[9];
+ 
+ /*----------------------------Objective function-----------------------------*/ 
+  Type nll = Type(0.0);
+  
+  
+  /*----------------------------contribution to the nll-----------------------*/ 
+  
+  // Contribution of the cereals observation  in pure stand  to the nll
+  vector<Type> m_c(n_c);
+  m_c = X_c * b_c;
+  MVNORM_t<Type> mvn_yc_cor(Idn_c);
+  vector<Type> vec_sd_c(n_c);
+  vec_sd_c.fill(exp(log_sd_c));
+  nll += VECSCALE(mvn_yc_cor, vec_sd_c)(y_c - m_c);
+  
+  
+  // Contribution of the legumes observation  in pure stand  to the nll
+  vector<Type> m_l(n_l);
+  m_l = X_l * b_l;
+  MVNORM_t<Type> mvn_yl_cor(Idn_l);
+  vector<Type> vec_sd_l(n_l);
+  vec_sd_l.fill(exp(log_sd_l));
+  nll += VECSCALE(mvn_yl_cor, vec_sd_l)(y_l- m_l);
+  
+
+  // Contribution of the observation in mix to the nll
+  UNSTRUCTURED_CORR_t<Type> mvn_y_u(unconstr_cor_E_mix);   // d x d; unscaled
+  vector<Type> sd_E_mix = exp(log_sd_E_mix);        // d x 1
+  VECSCALE_t<UNSTRUCTURED_CORR_t<Type> > f_y = VECSCALE(mvn_y_u, sd_E_mix);// d x d
+  MVNORM_t<Type> g_y(Id_mix);               //   n_1   x   n_1
+  SEPARABLE_t< VECSCALE_t<UNSTRUCTURED_CORR_t<Type> > , MVNORM_t<Type> > h_Y(f_y, g_y);
+  matrix<Type> M(Ymix.rows(), d);
+  M = Xmix*B_mix + ZDl_mix*U_l;
+  
+  //nll
+  nll += h_Y(Ymix - M.vec());
+  
+  /*----------------------------report correlation matrices------------------*/ 
+  
+  matrix<Type> Cor_E_mix(d,d);
+  Cor_E_mix = mvn_y_u.cov();
+  REPORT(Cor_E_mix);
+  
+  /*---------------------------reporting nll-------------------------------*/
+  return nll;
+}
+"
+dllID <- "TMB_full_lm_mod"
+cat(model, file=paste0(dllID, ".cpp"))
+if(! file.exists(paste0(dllID, ".so")))
+  compile(paste0(dllID, ".cpp"))
+dyn.load(dynlib(dllID))
+```
+
+
+Build object with  `MakeADFun` to combine the data, the parameters, and the model
+
+```{r}
+# Data & Parameters
+Data = list( C = W, L=P,
+             Ymix=Y_mix_1,Xmix=listZs[["Xmix"]], ZDl_mix=listZs[["ZDp_mix"]], Id_mix=diag(n_1),
+             y_c =y_w_pur_1, X_c = listZs[["X_wheat_pur"]], Idn_c = Idn_w_pur,
+             y_l =y_p_pur_1, X_l = listZs[["X_pea_pur"]], Idn_l = Idn_p_pur)
+
+
+Parameters = list(
+  beta = c(true_beta*0),
+  log_sd_c = log(1),
+  log_sd_l = log(1),
+  log_sd_E_mix=rep(log(1),d),
+  unconstr_cor_E_mix=rep(0, 1))
+
+
+system.time(
+  Obj <- MakeADFun(data=Data, parameters= Parameters,
+                   checkParameterOrder=FALSE,
+                  hessian=FALSE, DLL=dllID)
+)
+```
+
+Fitting the model to data using `nlminb` , alternatively we can use `TMBhelper::fit_tmb`:
+```{r}
+system.time(
+  Opt <- nlminb(start = Obj$par, # Initial values for the parameters
+                objective = Obj$fn, # Function to be minimized
+                gradient = Obj$gr) # Gradient of the objective
+)
+cat("\014");
+```
+
+######  Check
+
+```{r}
+Report = Obj$report()
+sdrep <- sdreport(Obj)
+sdr2pTmb <- summary(sdrep)
+cat("\014");
+
+```
+
+Parameters
+```{r}
+# Parameters
+fixed_effects <- as.numeric(sdr2pTmb[rownames(sdr2pTmb) == "beta", "Estimate"])
+var_er_mix <- exp(as.numeric(sdr2pTmb[rownames(sdr2pTmb) == "log_sd_E_mix", "Estimate"]))^2
+er_pur <-  exp(as.numeric(sdr2pTmb[c("log_sd_c", "log_sd_l"),"Estimate"]))^2
+cor_E_U_estimate <- c(Report$Cor_E_mix[2])
+
+params <- cbind("true"=c(
+  "specieswheat_pur"=block1SpeciesEffs["mu", "pure", "wheat"],
+  "specieswheat:block1"= block1SpeciesEffs["block1", "pure", "wheat"],
+  "speciespea_pur"=block1SpeciesEffs["mu", "pure", "pea"],
+  "speciespea:block1_pur"= block1SpeciesEffs["block1", "pure", "pea"],
+  "speciespea:focal1"=focal1,
+  "speciespea:neighbors1"= neighbors1, 
+  
+  "specieswheat_mix"=block1SpeciesEffs["mu", "mixed", "wheat"],
+  "specieswheat:block1_mix"= block1SpeciesEffs["block1", "mixed", "wheat"],
+  "speciespea_mix"=block1SpeciesEffs["mu", "mixed", "pea"], 
+  "speciespea:block1_mix"=block1SpeciesEffs["block1", "mixed", "pea"],
+  "cor_sigma_err_mix"=truth[["cor_E"]],
+  "sigma_err_w_mix"=truth[["sigma2_err_w"]],
+  "sigma_err_p_mix"=truth[["sigma2_err_p"]],
+  "sigma_err_w_pur"=truth[["sigma2_err_w"]],
+  "sigma_err_p_pur"=truth[["sigma2_err_p"]]),
+                
+                "TMB"=c(c(round(fixed_effects, 2), round(cor_E_U_estimate, 2),
+                          round(var_er_mix,2),  round(er_pur, 2))))
+params
+```
+
+std. error
+```{r}
+# Extracting standard errors
+row_names<- c("beta", "log_sd_E_mix", "log_sd_c", "log_sd_l")
+std.Error <- sdr2pTmb[rownames(sdr2pTmb) %in% row_names, "Std. Error"]
+names(std.Error) <- rownames(sdr2pTmb)[rownames(sdr2pTmb) %in% row_names]
+
+# Convert to data frame and assign column names
+cbind( round(std.Error, 4))
+```
 
 # Appendix
+print(sessionInfo(), locale=FALSE)
 
 ```{r info}
 t1 <- proc.time(); t1 - t0
-print(sessionInfo(), locale=FALSE)
 ```
-
