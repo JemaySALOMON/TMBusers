@@ -27,6 +27,9 @@
         else
           dyn.load(TMB::dynlib(tmbObj$dllID))
         
+        #range check
+        if(!is.list(tmbObj)) stop("tmbOj must be a list")
+        
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
         
         if (is.null(params)) {
@@ -72,10 +75,8 @@
         else
           dyn.load(TMB::dynlib(tmbObj$dllID))
         
-        #check
-        if (!is.list(tmbObj)) {
-          stop("out must be a list")
-        }
+        #range check
+        if(!is.list(tmbObj)) stop("tmbOj must be a list")
         
         if(is.null(params)){
           parameters <- tmbObj$fit$par
@@ -127,7 +128,8 @@
         else
           dyn.load(TMB::dynlib(tmbObj$dllID))
         
-        # check
+        #range check
+        if(!is.list(tmbObj)) stop("tmbOj must be a list")
         if(is.null(params)){
           stop("Params must be specified")}
         idx <- ExtractParamsTmb(tmbObj,params, reNames)
@@ -167,9 +169,7 @@
           dyn.load(TMB::dynlib(tmbObj$dllID))
         
         #range check
-        if (!is.list(tmbObj)) {
-          stop("out must be a list")
-        }
+        if(!is.list(tmbObj)) stop("tmbOj must be a list")
         
         #Get report object from report(f)
         objReport = tmbObj$f$report()
