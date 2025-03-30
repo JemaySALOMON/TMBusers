@@ -1,3 +1,1 @@
-This repository contains a mini R package with functions written in R to extract TMB parameters. 
-
-The package is currently under development. Don't install!
+TMBusers: A mini R package providing useful functions to work with TMB object. This package is currently under development and aims to simplify working with TMB output for model interpretation and analysis.
