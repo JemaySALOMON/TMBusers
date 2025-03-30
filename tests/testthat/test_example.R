@@ -1,15 +1,22 @@
 library(testthat)
-library(tmbExtract)
 library(TMB)
-runExample("simple")
-
 
 test_that("ExtractParamsTmb", {
-  expected <- c(0)
-  observed <- c(0)
-
+  
+  out <- runExample("simple")
+  setwd(system.file("examples",package="TMB"))
+  tmbObj <- list()
+  tmbObj$fit <- out$value
+  tmbObj$dllID <- "simple"
+  
+  expected <- ExtractParamsTmb(tmbObj)
+  
+  observed <- c("beta"=52.01370232, "beta"=30.24058534,  
+                "logsdu" =-0.15777145,"logsd0"=0.03326068)
+  
   expect_equal(observed, expected)
 })
+
 
 test_that("ExtractCorTmb", {
   expected <- c(0)
@@ -31,7 +38,6 @@ test_that("ExtractStdTmb", {
   
   expect_equal(observed, expected)
 })
-
 
 test_that("ExtractVarTmb", {
   expected <- c(0)
