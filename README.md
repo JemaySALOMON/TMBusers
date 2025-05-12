@@ -7,7 +7,7 @@ Package "TMBUsers"
 ## Installation
 
 ```{r, eval = FALSE}
-# The easiest way to install TMBUsers:
+# The easiest way to install TMBusers:
 library(devtools); install_github("JemaySALOMON/TMBusers")
 ```
 
