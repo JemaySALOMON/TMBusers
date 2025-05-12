@@ -1,7 +1,6 @@
 Package "TMBUsers"
 =========================
 
-
 ## Installation
 
 ```{r, eval = FALSE}
