@@ -1,4 +1,4 @@
-#' Get the Version of the tmbExtract Package
+#' Get the Version of the TMBusers Package
 #'
 #' This function returns the version of the `TMBusers` package.
 #'

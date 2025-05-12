@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{TMBusers.version}
 \alias{TMBusers.version}
-\title{Get the Version of the tmbExtract Package}
+\title{Get the Version of the TMBusers Package}
 \usage{
 TMBusers.version()
 }
