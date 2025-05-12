@@ -6,10 +6,10 @@
 ##' @author Jemay Salomon
 ##' 
 ##' @examples
-##' tmbExtract.version()
+##' TMBusers.version()
 ##' @export
-tmbExtract.version <- function() {
-  list(package = packageVersion("tmbExtract"))
+TMBusers.version <- function() {
+  list(package = packageVersion("TMBusers"))
 }
 
 
