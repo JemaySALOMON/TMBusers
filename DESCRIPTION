@@ -1,0 +1,19 @@
+Package: TMBusers
+Title: Useful functions to work with Template Model Builder (TMB) - R package
+Version: 0.1.0
+Author: Jemay Salomon <jemay.salomon@inrae.fr>
+Maintainer: Jemay Salomon <jemay.salomon@inrae.fr>
+Description: Useful functions to work with Template Model Builder (TMB) - R package
+    and nlminb objects.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    TMB
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

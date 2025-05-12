@@ -1,0 +1,51 @@
+---
+title: "Introduction to TMBusers"
+author: "Jemay Salomon"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+lang: "fr"
+output:
+  html_document:
+    toc: true
+    toc_depth: 5
+    toc_float: true
+    number_sections: TRUE
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: TRUE
+colorlinks: true
+urlcolor: blue
+vignette: >
+  %\VignetteIndexEntry{Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This document will also require external packages to be available, for instance:
+
+```{r load_pkg}
+suppressPackageStartupMessages(library(TMB))
+suppressPackageStartupMessages(library(TMBusers))
+```
+
+Execution time (see the appendix):
+
+```{r time_0}
+t0 <- proc.time()
+```
+
+# Overview
+
+# R data
+
+# Fitting TMB
+
+# Extract
+
+
+# Appendix
+print(sessionInfo(), locale=FALSE)
+
+```{r info}
+t1 <- proc.time(); t1 - t0
+```
