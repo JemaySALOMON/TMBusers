@@ -1,5 +1,5 @@
 Package: TMBusers
-Title: Useful functions to work with Template Model Builder (TMB) - R package
+Title: Useful functions to work with Template Model Builder (TMB)
 Version: 0.1.0
 Author: Jemay Salomon <jemay.salomon@inrae.fr>
 Maintainer: Jemay Salomon <jemay.salomon@inrae.fr>
