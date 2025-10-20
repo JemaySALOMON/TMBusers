@@ -1,9 +1,7 @@
 library(testthat)
 
-
 test_that("ExtractParamsTmb", {
-  
-  skip_on_os("windows") ##for now
+  skip_on_os("windows") # for now
   
   path <- system.file("examples", package = "TMB")
   out <- TMB::runExample("simple")
@@ -16,9 +14,7 @@ test_that("ExtractParamsTmb", {
     "logsd0" = 0.03326068
   )
   expect_equal(observed, expected)
-  
 })
-
 
 test_that("ExtractCorTmb", {
   expected <- c(0)
