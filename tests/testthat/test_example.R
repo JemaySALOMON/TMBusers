@@ -3,18 +3,10 @@ library(testthat)
 
 test_that("ExtractParamsTmb", {
   
-  library(TMB)
   path <- system.file("examples", package = "TMB")
-  tmp <- tempdir()
-  file.copy(file.path(path, "simple.cpp"), tmp)
-  
-  cppFile <- file.path(tmp, "simple.cpp")
-  TMB::compile(cppFile, clean = TRUE)  # let TMB handle flags automatically
-  dyn.load(file.path(tmp, TMB::dynlib("simple")))
-  
+  TMB::compile(file.path(tmp, "simple.cpp"), clean = TRUE)
   out <- runExample("simple")
   out_test <- list(fit = out$value)
-  
   expected <- ExtractParamsTmb(out_test, dllID = "simple", path = tmp)
   observed <- c(
     "beta" = 52.01370232,
@@ -23,6 +15,7 @@ test_that("ExtractParamsTmb", {
     "logsd0" = 0.03326068
   )
   expect_equal(observed, expected)
+  
 })
 
 
