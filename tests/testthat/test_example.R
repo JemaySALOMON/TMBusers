@@ -8,7 +8,7 @@ test_that("ExtractParamsTmb", {
   out <- runExample("simple")
   out_test <- list(fit = out$value)
   
-  expected <- ExtractParamsTmb(out_test, dllID = "simple", path = tmp)
+  expected <- ExtractParamsTmb(out_test, dllID = "simple", path = path)
   observed <- c(
     "beta" = 52.01370232,
     "beta" = 30.24058534,
