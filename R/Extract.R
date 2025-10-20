@@ -14,6 +14,7 @@
       ## @examples
       #'@export
       ExtractRandTmb <- function(tmbObj,
+                                 dllID,
                                  params = NULL,
                                  reNames = NULL,
                                  path = NULL) {
@@ -23,9 +24,9 @@
         
         # Load the DLL using dyn.load
         if(!is.null(path))
-          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+          dyn.load(file.path(path, TMB::dynlib(dllID)))
         else
-          dyn.load(TMB::dynlib(tmbObj$dllID))
+          dyn.load(TMB::dynlib(dllID))
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
@@ -41,7 +42,9 @@
             idx <- which(rownames(summary(sdreporttmbObj, select = "random")) == rand)
             if (length(idx) == 0) stop(paste("Random effect '", rand, "' not found in summary."))
             summary(sdreporttmbObj, select = "random")[idx, "Estimate"] })
-          names(randEffs) <- params
+          randEffs <- unlist(randEffs, recursive = TRUE, use.names = TRUE)
+          randEffs <- as.numeric(randEffs)
+          names(randEffs) <- reNames
         }
         
         return(unlist(randEffs))
@@ -64,6 +67,7 @@
       #'@export
       ExtractParamsTmb <- function(tmbObj,
                                    params = NULL,
+                                   dllID,
                                    reNames = NULL,
                                    path = NULL) {
         #require tmb packages and make summary
@@ -71,9 +75,9 @@
         
         # Load the DLL using dyn.load
         if(!is.null(path))
-          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+          dyn.load(file.path(path, TMB::dynlib(dllID)))
         else
-          dyn.load(TMB::dynlib(tmbObj$dllID))
+          dyn.load(TMB::dynlib(dllID))
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
@@ -116,6 +120,7 @@
       #'@export
       ExtractVarTmb <- function(tmbObj,
                                 params,
+                                dllID,
                                 reNames = NULL,
                                 path = NULL) {
         
@@ -124,15 +129,15 @@
         
         # Load the DLL using dyn.load
         if(!is.null(path))
-          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+          dyn.load(file.path(path, TMB::dynlib(dllID)))
         else
-          dyn.load(TMB::dynlib(tmbObj$dllID))
+          dyn.load(TMB::dynlib(dllID))
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
         if(is.null(params)){
           stop("Params must be specified")}
-        idx <- ExtractParamsTmb(tmbObj,params, reNames)
+        idx <- ExtractParamsTmb(tmbObj,params, path, dllID, reNames)
         
         var <- exp((idx))^2
         
@@ -156,6 +161,7 @@
       #'@export
       ExtractCorTmb <- function(tmbObj,
                                 params = NULL,
+                                dllID,
                                 reNames = NULL,
                                 path = NULL) {
         
@@ -164,9 +170,9 @@
         
         # Load the DLL using dyn.load
         if(!is.null(path))
-          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+          dyn.load(file.path(path, TMB::dynlib(dllID)))
         else
-          dyn.load(TMB::dynlib(tmbObj$dllID))
+          dyn.load(TMB::dynlib(dllID))
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
@@ -215,6 +221,7 @@
       #'
       #'@export
       ExtractStdTmb <- function(tmbObj,
+                                dllID,
                                 params = NULL, 
                                 reNames = NULL,
                                 path = NULL){
@@ -224,9 +231,9 @@
         
         # Load the DLL using dyn.load
         if(!is.null(path))
-          dyn.load(file.path(path, TMB::dynlib(tmbObj$dllID)))
+          dyn.load(file.path(path, TMB::dynlib(dllID)))
         else
-          dyn.load(TMB::dynlib(tmbObj$dllID))
+          dyn.load(TMB::dynlib(dllID))
       
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
@@ -272,12 +279,14 @@
       tmbExtract <- function(tmbObj,
                              params = NULL,
                              reNames = NULL,
+                             dllID,
                              path = NULL,
                              paramsType){
         
         #set arguments parameters
         argsTmb <- list(tmbObj = tmbObj,
                         params = params,
+                        dllID = dllID,
                         reNames = reNames,
                         path = path)
         
