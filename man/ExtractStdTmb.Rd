@@ -4,10 +4,12 @@
 \alias{ExtractStdTmb}
 \title{ExtractStdTmb}
 \usage{
-ExtractStdTmb(tmbObj, params = NULL, reNames = NULL, path = NULL)
+ExtractStdTmb(tmbObj, dllID, params = NULL, reNames = NULL, path = NULL)
 }
 \arguments{
 \item{tmbObj}{A list that contains the TMB::MakeADFun and nlminb tmbObjects.}
+
+\item{dllID}{DLL}
 
 \item{params}{Parameter names to extract. If NULL, all parameters will be extracted.}
 

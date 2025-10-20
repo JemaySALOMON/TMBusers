@@ -4,12 +4,14 @@
 \alias{ExtractVarTmb}
 \title{ExtractVarTmb}
 \usage{
-ExtractVarTmb(tmbObj, params, reNames = NULL, path = NULL)
+ExtractVarTmb(tmbObj, params, dllID, reNames = NULL, path = NULL)
 }
 \arguments{
 \item{tmbObj}{A list that contains the TMB::MakeADFun and nlminb tmbObjects.}
 
 \item{params}{Parameter names to extract. If NULL, all parameters will be extracted.}
+
+\item{dllID}{DLL}
 
 \item{reNames}{A vector of names to rename parameters. If NULL, the original TMB names will be retained.}
 

@@ -4,10 +4,12 @@
 \alias{ExtractRandTmb}
 \title{ExtractRandTmb}
 \usage{
-ExtractRandTmb(tmbObj, params = NULL, reNames = NULL, path = NULL)
+ExtractRandTmb(tmbObj, dllID, params = NULL, reNames = NULL, path = NULL)
 }
 \arguments{
 \item{tmbObj}{A list that contains the TMB::MakeADFun and nlminb objects.}
+
+\item{dllID}{DLL}
 
 \item{params}{Parameter names to extract. If NULL, all parameters will be extracted.}
 
