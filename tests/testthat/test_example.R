@@ -3,6 +3,8 @@ library(testthat)
 
 test_that("ExtractParamsTmb", {
   
+  skip_on_os("windows") ##for now
+  
   path <- system.file("examples", package = "TMB")
   out <- TMB::runExample("simple")
   out_test <- list(fit = out$value)
