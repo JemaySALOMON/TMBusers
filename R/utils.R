@@ -9,7 +9,8 @@
 #' TMBusers.version()
 #' @export
 TMBusers.version <- function() {
-  list(package = packageVersion("TMBusers"))
+  requireNamespace(package="utils") 
+  list(package = utils::packageVersion("TMBusers"))
 }
 
 
