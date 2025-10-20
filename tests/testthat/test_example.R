@@ -4,7 +4,8 @@ library(TMB)
 test_that("ExtractParamsTmb", {
   
   path <- system.file("examples", package = "TMB")
-  TMB::compile(file.path(path, "simple.cpp"), clean = TRUE, TMB:::CxxFlags())
+  TMB::compile(file.path(path, "simple.cpp"), clean = TRUE, 
+               flags = paste0("-I", system.file("include", package="TMB")))
   out <- runExample("simple")
   out_test <- list(fit = out$value)
   
