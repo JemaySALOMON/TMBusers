@@ -1,7 +1,6 @@
 library(testthat)
 
 test_that("ExtractParamsTmb", {
-  # skip_on_os("windows") # for now
   path <- system.file("examples", package = "TMB")
   TMB::compile(file.path(path, "simple.cpp"), clean = TRUE)
   out <- TMB::runExample("simple")
@@ -34,15 +33,19 @@ test_that("ExtractStdTmb", {
   observed <- c(0)
   expect_equal(observed, expected)
 })
-
 test_that("ExtractVarTmb", {
-  expected <- c(0)
-  observed <- c(0)
-  expect_equal(observed, expected)
-})
-
-test_that("tmbExtract", {
-  expected <- c(0)
-  observed <- c(0)
+  
+  path <- system.file("examples", package = "TMB")
+  TMB::compile(file.path(path, "simple.cpp"), clean = TRUE)
+  out <- TMB::runExample("simple")
+  out_test <- list(fit = out$value)
+  expected <- ExtractVarTmb(out_test, 
+                            params = c("logsdu","logsd0"),
+                            dllID = "simple", 
+                            path = path)
+  observed <- c(
+    "logsdu" = exp(-0.15777145)^2,
+    "logsd0" = exp(0.03326068)^2
+  )
   expect_equal(observed, expected)
 })

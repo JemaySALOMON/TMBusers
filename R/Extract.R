@@ -142,7 +142,7 @@
           stop("Params must be specified")}
         idx <- ExtractParamsTmb(tmbObj,params, path, dllID, reNames)
         
-        var <- exp((idx))^2
+        var <- exp(idx)^2
         
         return(var)
       }
