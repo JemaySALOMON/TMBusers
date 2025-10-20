@@ -3,15 +3,22 @@ library(TMB)
 
 test_that("ExtractParamsTmb", {
   
-  path = file.path(system.file("examples",package="TMB"))
+  path <- system.file("examples", package = "TMB")
+  tmp <- tempdir()
+  file.copy(file.path(path, "simple.cpp"), tmp)
+  oldwd <- setwd(tmp)
+  on.exit(setwd(oldwd), add = TRUE)
+  TMB::compile("simple.cpp", clean = TRUE)
+  dyn.load(TMB::dynlib("simple"))
   out <- runExample("simple")
-  
-  out_test <- list()
-  out_test$fit <- out$value
-  
-  expected <- ExtractParamsTmb(out_test, dllID="simple", path=path)
-  observed <- c("beta"=52.01370232, "beta"=30.24058534,  
-                "logsdu" =-0.15777145,"logsd0"=0.03326068)
+  out_test <- list(fit = out$value)
+  expected <- ExtractParamsTmb(out_test, dllID = "simple", path = tmp)
+  observed <- c(
+    "beta" = 52.01370232,
+    "beta" = 30.24058534,
+    "logsdu" = -0.15777145,
+    "logsd0" = 0.03326068
+  )
   expect_equal(observed, expected)
 })
 
