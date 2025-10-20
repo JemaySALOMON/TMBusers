@@ -4,7 +4,7 @@ library(testthat)
 test_that("ExtractParamsTmb", {
   
   path <- system.file("examples", package = "TMB")
-  TMB::compile(file.path(tmp, "simple.cpp"), clean = TRUE)
+  TMB::compile(file.path(path, "simple.cpp"), clean = TRUE)
   out <- runExample("simple")
   out_test <- list(fit = out$value)
   expected <- ExtractParamsTmb(out_test, dllID = "simple", path = path)
