@@ -7,9 +7,8 @@ test_that("ExtractParamsTmb", {
   setwd(system.file("examples",package="TMB"))
   tmbObj <- list()
   tmbObj$fit <- out$value
-  tmbObj$dllID <- "simple"
   
-  expected <- ExtractParamsTmb(tmbObj)
+  expected <- ExtractParamsTmb(tmbObj, dllID="simple")
   
   observed <- c("beta"=52.01370232, "beta"=30.24058534,  
                 "logsdu" =-0.15777145,"logsd0"=0.03326068)
