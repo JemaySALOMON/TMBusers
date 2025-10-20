@@ -1,7 +1,7 @@
 library(testthat)
 
 test_that("ExtractParamsTmb", {
-  path <- system.file("examples", package = "TMB")
+  path <- file.path(system.file("examples", package = "TMB"))
   TMB::compile(file.path(path, "simple.cpp"), clean = TRUE)
   out <- TMB::runExample("simple")
   out_test <- list(fit = out$value)
@@ -33,9 +33,10 @@ test_that("ExtractStdTmb", {
   observed <- c(0)
   expect_equal(observed, expected)
 })
+
 test_that("ExtractVarTmb", {
   
-  path <- system.file("examples", package = "TMB")
+  path <- file.path(system.file("examples", package = "TMB"))
   TMB::compile(file.path(path, "simple.cpp"), clean = TRUE)
   out <- TMB::runExample("simple")
   out_test <- list(fit = out$value)
@@ -49,3 +50,4 @@ test_that("ExtractVarTmb", {
   )
   expect_equal(observed, expected)
 })
+

@@ -24,10 +24,10 @@
         requireNamespace(package="TMB")
         
         # Load the DLL using dyn.load
-        if(!is.null(path))
+        if(!is.null(path)){
           dyn.load(file.path(path, TMB::dynlib(dllID)))
-        else
-          dyn.load(TMB::dynlib(dllID))
+        }else{
+          dyn.load(TMB::dynlib(dllID))}
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
@@ -76,10 +76,10 @@
         requireNamespace(package="TMB")
         
         # Load the DLL using dyn.load
-        if(!is.null(path))
+        if(!is.null(path)) {
           dyn.load(file.path(path, TMB::dynlib(dllID)))
-        else
-          dyn.load(TMB::dynlib(dllID))
+        }else {
+          dyn.load(TMB::dynlib(dllID))}
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
@@ -131,17 +131,16 @@
         requireNamespace(package="TMB")
         
         # Load the DLL using dyn.load
-        if(!is.null(path))
+        if(!is.null(path)) {
           dyn.load(file.path(path, TMB::dynlib(dllID)))
-        else
-          dyn.load(TMB::dynlib(dllID))
+        }else{
+          dyn.load(TMB::dynlib(dllID))}
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
         if(is.null(params)){
           stop("Params must be specified")}
-        idx <- ExtractParamsTmb(tmbObj,params, path, dllID, reNames)
-        
+        idx <- ExtractParamsTmb(tmbObj, params, path = path, dllID, reNames)
         var <- exp(idx)^2
         
         return(var)
@@ -173,10 +172,10 @@
         requireNamespace(package="TMB")
         
         # Load the DLL using dyn.load
-        if(!is.null(path))
+        if(!is.null(path)){
           dyn.load(file.path(path, TMB::dynlib(dllID)))
-        else
-          dyn.load(TMB::dynlib(dllID))
+        }else{
+          dyn.load(TMB::dynlib(dllID))}
         
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
@@ -235,10 +234,10 @@
         requireNamespace(package="TMB")  
         
         # Load the DLL using dyn.load
-        if(!is.null(path))
+        if(!is.null(path)){
           dyn.load(file.path(path, TMB::dynlib(dllID)))
-        else
-          dyn.load(TMB::dynlib(dllID))
+        }else{
+          dyn.load(TMB::dynlib(dllID))}
       
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
