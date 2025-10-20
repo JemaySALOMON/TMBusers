@@ -37,7 +37,11 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          rtools-version: '44'
+          rtools-version: '44' # ensures Windows has Rtools
+
+      # Install RcppEigen before dependencies
+      - name: Install Eigen dependency (RcppEigen)
+        run: Rscript -e 'install.packages("RcppEigen")'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
