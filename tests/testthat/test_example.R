@@ -3,17 +3,16 @@ library(TMB)
 
 test_that("ExtractParamsTmb", {
   
+  path <- system.file("examples", package = "TMB")
   out <- runExample("simple")
   path = file.path(system.file("examples",package="TMB"))
   tmbObj <- list()
   tmbObj$fit <- out$value
-  
   expected <- ExtractParamsTmb(tmbObj, dllID="simple", path=path)
-  
   observed <- c("beta"=52.01370232, "beta"=30.24058534,  
                 "logsdu" =-0.15777145,"logsd0"=0.03326068)
-  
   expect_equal(observed, expected)
+  
 })
 
 
