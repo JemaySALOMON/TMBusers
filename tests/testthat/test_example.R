@@ -4,10 +4,7 @@ library(TMB)
 test_that("ExtractParamsTmb", {
   
   path <- system.file("examples", package = "TMB")
-  tmp <- tempdir()
-  file.copy(file.path(path, "simple.cpp"), tmp)
-  TMB::compile(file.path(tmp, "simple.cpp"), clean = TRUE)
-  
+  TMB::compile(file.path(path, "simple.cpp"), clean = TRUE)
   out <- runExample("simple")
   out_test <- list(fit = out$value)
   
@@ -18,6 +15,7 @@ test_that("ExtractParamsTmb", {
     "logsdu" = -0.15777145,
     "logsd0" = 0.03326068
   )
+  
   expect_equal(observed, expected)
 })
 
