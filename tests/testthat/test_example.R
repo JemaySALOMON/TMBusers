@@ -4,7 +4,6 @@ library(TMB)
 test_that("ExtractParamsTmb", {
   
   path = file.path(system.file("examples",package="TMB"))
-  # TMB::compile(file.path(path, "simple.cpp"))
   out <- runExample("simple")
   
   out_test <- list()
