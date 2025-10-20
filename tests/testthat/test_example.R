@@ -6,12 +6,11 @@ test_that("ExtractParamsTmb", {
   path <- system.file("examples", package = "TMB")
   tmp <- tempdir()
   file.copy(file.path(path, "simple.cpp"), tmp)
-  oldwd <- setwd(tmp)
-  on.exit(setwd(oldwd), add = TRUE)
   TMB::compile("simple.cpp", clean = TRUE)
-  dyn.load(TMB::dynlib("simple"))
+  
   out <- runExample("simple")
   out_test <- list(fit = out$value)
+  
   expected <- ExtractParamsTmb(out_test, dllID = "simple", path = tmp)
   observed <- c(
     "beta" = 52.01370232,
@@ -21,6 +20,7 @@ test_that("ExtractParamsTmb", {
   )
   expect_equal(observed, expected)
 })
+
 
 
 test_that("ExtractCorTmb", {
