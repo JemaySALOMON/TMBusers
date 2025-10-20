@@ -35,7 +35,6 @@ test_that("ExtractStdTmb", {
 })
 
 test_that("ExtractVarTmb", {
-  
   path <- file.path(system.file("examples", package = "TMB"))
   TMB::compile(file.path(path, "simple.cpp"), clean = TRUE)
   out <- TMB::runExample("simple")

@@ -39,7 +39,6 @@ jobs:
           use-public-rspm: true
           rtools-version: '44'
 
-      # Install RcppEigen before dependencies
       - name: Install Eigen dependency (RcppEigen)
         run: Rscript -e 'install.packages("RcppEigen")'
 
