@@ -3,6 +3,8 @@ Package "TMBUsers"
 
 ## Overview
 
+This package is under construction. Please report any issues you encounter.
+
 
 ## Installation
 
