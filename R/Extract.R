@@ -5,7 +5,7 @@
       #'  Function to extracts random coefficients from a list containing TMB::MakeADFun and nlminb bObjects.
       #'
       #'
-      #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb objects.
+      #' @param tmbObj A list that contains the TMB::MakeADFun and nlminb objects (f, fit).
       #' @param params Parameter names to extract. If NULL, all parameters will be extracted.
       #' @param reNames A vector of names to rename parameters. If NULL, the original TMB names will be retained.
       #' @param path The path trough your dllID-object location. If it is in the current working directory, set it to NULL
@@ -19,26 +19,26 @@
                                  params = NULL,
                                  reNames = NULL,
                                  path = NULL) {
-        
+
         #require tmb packages and make summary
         requireNamespace(package="TMB")
-        
+
         # Load the DLL using dyn.load
         if(!is.null(path)){
           dyn.load(file.path(path, TMB::dynlib(dllID)))
         }else{
           dyn.load(TMB::dynlib(dllID))}
-        
+
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
-        
+
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
-        
+
         if (is.null(params)) {
           randEffs <- summary(sdreporttmbObj, select = "random")[, "Estimate"]
         } else {
           if (!is.character(params)) stop("The 'random' argument must be a character vector.")
-          
+
           randEffs <- lapply(params, function(rand) {
             idx <- which(rownames(summary(sdreporttmbObj, select = "random")) == rand)
             if (length(idx) == 0) stop(paste("Random effect '", rand, "' not found in summary."))
@@ -47,12 +47,12 @@
           randEffs <- as.numeric(randEffs)
           names(randEffs) <- reNames
         }
-        
+
         return(unlist(randEffs))
       }
-      
-      
-      
+
+
+
       #' @title ExtractParamsTmb
       #'
       #'@description
@@ -74,16 +74,16 @@
                                    path = NULL) {
         #require tmb packages and make summary
         requireNamespace(package="TMB")
-        
+
         # Load the DLL using dyn.load
         if(!is.null(path)) {
           dyn.load(file.path(path, TMB::dynlib(dllID)))
         }else {
           dyn.load(TMB::dynlib(dllID))}
-        
+
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
-        
+
         if(is.null(params)){
           parameters <- tmbObj$fit$par
         } else {
@@ -92,20 +92,20 @@
               stop(paste(param, " not found in out$fit$par"))}
             idx <- grepl(paste0("^", param, "$"), names(tmbObj$fit$par))
             return(tmbObj$fit$par[idx])})
-          
+
           parameters <- (unlist(tmbParams))
-          
+
           if (!is.null(reNames)) {
             stopifnot(length(reNames)==length(parameters))
             names(parameters) <- reNames
           }
         }
-        
+
         return(parameters)
       }
-      
-      
-      
+
+
+
       #' @title ExtractVarTmb
       #'
       #'@description
@@ -126,27 +126,27 @@
                                 dllID,
                                 reNames = NULL,
                                 path = NULL) {
-        
+
         #require tmb packages and make summary
         requireNamespace(package="TMB")
-        
+
         # Load the DLL using dyn.load
         if(!is.null(path)) {
           dyn.load(file.path(path, TMB::dynlib(dllID)))
         }else{
           dyn.load(TMB::dynlib(dllID))}
-        
+
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
         if(is.null(params)){
           stop("Params must be specified")}
         idx <- ExtractParamsTmb(tmbObj, params, path = path, dllID, reNames)
         var <- exp(idx)^2
-        
+
         return(var)
       }
-      
-      
+
+
       #' @title  ExtractCorTmb
       #'
       #'@description
@@ -167,25 +167,25 @@
                                 dllID,
                                 reNames = NULL,
                                 path = NULL) {
-        
+
         #require tmb packages and make summary
         requireNamespace(package="TMB")
-        
+
         # Load the DLL using dyn.load
         if(!is.null(path)){
           dyn.load(file.path(path, TMB::dynlib(dllID)))
         }else{
           dyn.load(TMB::dynlib(dllID))}
-        
+
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
-        
+
         #Get report object from report(f)
         objReport = tmbObj$f$report()
-        
+
         #set the output list
         out <- list()
-        
+
         #set conditions parameters
         if(is.null(params)){
           Names <- list()
@@ -193,22 +193,22 @@
             Names[[param]] <- names(objReport)[[param]]
             out[[param]] <- objReport[[param]][2]
             names(out) <- Names}
-          
+
         } else {
           for(param in params) {
             if (is.null(objReport[[param]])) stop(paste(param, "not found in obj$f$report()"))
             out[[param]] <- objReport[[param]][2]}
-          
+
           if (!is.null(reNames)) {
             stopifnot(length(reNames) == length(out))
             names(out) <- reNames
           }
         }
-        
+
         return(unlist(out))
       }
-      
-      
+
+
       #' @title  ExtractStdTmb
       #'
       #'@description
@@ -226,47 +226,47 @@
       #'@export
       ExtractStdTmb <- function(tmbObj,
                                 dllID,
-                                params = NULL, 
+                                params = NULL,
                                 reNames = NULL,
                                 path = NULL){
-        
+
         #require tmb packages and make summary
-        requireNamespace(package="TMB")  
-        
+        requireNamespace(package="TMB")
+
         # Load the DLL using dyn.load
         if(!is.null(path)){
           dyn.load(file.path(path, TMB::dynlib(dllID)))
         }else{
           dyn.load(TMB::dynlib(dllID))}
-      
+
         #range check
         if(!is.list(tmbObj)) stop("tmbOj must be a list")
-        
+
         sdreporttmbObj <- TMB::sdreport(tmbObj$f)
-        
+
         if (is.null(params)) {
           stdEffs <- summary(sdreporttmbObj)[, "Std. Error"]
         } else {
           if (!is.character(params)) stop("The 'params' argument must be a character vector.")
-          
+
           tmp <- lapply(params, function(std) {
             idx <- which(rownames(summary(sdreporttmbObj)) == std)
             if (length(idx) == 0) stop(paste("std effect '", std, "' not found in summary."))
             summary(sdreporttmbObj)[idx, "Std. Error"] })
         }
-        
+
         out <- unlist(tmp)
-        
+
         if(!is.null(reNames)){
           stopifnot(length(out)==length(reNames))
           names(out) <- reNames
         }
-        
+
         return(cbind("Std. Error" = out))
       }
-      
-      
-      
+
+
+
       #' @title tmbExtract
       #'
       #'@description
@@ -287,14 +287,14 @@
                              dllID,
                              path = NULL,
                              paramsType){
-        
+
         #set arguments parameters
         argsTmb <- list(tmbObj = tmbObj,
                         params = params,
                         dllID = dllID,
                         reNames = reNames,
                         path = path)
-        
+
         #set conditions
         if (paramsType == "paramsTmb") {
           out <- do.call(ExtractParamsTmb, argsTmb)
@@ -309,9 +309,8 @@
         } else {
           stop("Invalid paramsType")
         }
-        
+
         #return
         return(out)
-        
+
       }
-      
